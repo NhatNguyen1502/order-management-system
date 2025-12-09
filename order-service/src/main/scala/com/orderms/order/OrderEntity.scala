@@ -84,17 +84,17 @@ object OrderEntity {
       EventSourcedBehavior[Command, Event, OrderState](
         persistenceId = PersistenceId.ofUniqueId(orderId),
         emptyState = OrderState.empty,
-        commandHandler = commandHandler,
+        commandHandler = commandHandler(orderId),
         eventHandler = (state, event) => state.applyEvent(event)
       )
     }
   }
 
-  private def commandHandler(state: OrderState, command: Command): ReplyEffect[Event, OrderState] = {
+  private def commandHandler(orderId: String)(state: OrderState, command: Command): ReplyEffect[Event, OrderState] = {
     command match {
       case CreateOrder(customerId, items, replyTo) =>
         if (state.orderId.isEmpty) {
-          val event = OrderCreated(state.orderId, customerId, items, Instant.now())
+          val event = OrderCreated(orderId, customerId, items, Instant.now())
           Effect.persist(event).thenReply(replyTo) { newState =>
             OrderCreatedResponse(newState.orderId, OrderStatus.toString(newState.status))
           }
