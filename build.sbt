@@ -16,7 +16,10 @@ lazy val commonSettings = Seq(
     "-unchecked",
     "-Xlint"
   ),
-  resolvers += "Akka library repository".at("https://repo.akka.io/maven")
+  resolvers ++= Seq(
+    "Akka library repository".at("https://repo.akka.io/maven"),
+    "Akka Projection repository".at("https://repo.akka.io/maven")
+  )
 )
 
 lazy val commonDependencies = Seq(
@@ -40,7 +43,8 @@ lazy val apiGateway = (project in file("api-gateway"))
     libraryDependencies ++= commonDependencies ++ Seq(
       "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http-cors" % "1.2.0"
+      "com.typesafe.akka" %% "akka-http2-support" % akkaHttpVersion,
+      "ch.megard" %% "akka-http-cors" % "1.2.0"
     )
   )
   .enablePlugins(AkkaGrpcPlugin)
@@ -56,7 +60,10 @@ lazy val orderService = (project in file("order-service"))
       "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
       "com.lightbend.akka" %% "akka-projection-eventsourced" % akkaProjectionVersion,
       "com.lightbend.akka" %% "akka-projection-jdbc" % akkaProjectionVersion,
+      "com.lightbend.akka" %% "akka-projection-slick" % akkaProjectionVersion,
       "com.typesafe.akka" %% "akka-persistence-jdbc" % "5.3.0",
+      "com.typesafe.slick" %% "slick" % "3.4.1",
+      "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
       "org.postgresql" % "postgresql" % "42.6.0",
       "com.zaxxer" % "HikariCP" % "5.1.0"
     )
@@ -72,6 +79,8 @@ lazy val inventoryService = (project in file("inventory-service"))
       "com.typesafe.akka" %% "akka-persistence-query" % akkaPersistenceVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
       "com.typesafe.akka" %% "akka-persistence-jdbc" % "5.3.0",
+      "com.typesafe.slick" %% "slick" % "3.4.1",
+      "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
       "org.postgresql" % "postgresql" % "42.6.0",
       "com.zaxxer" % "HikariCP" % "5.1.0"
     )

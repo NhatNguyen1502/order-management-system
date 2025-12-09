@@ -265,16 +265,34 @@ docker system prune -f
 docker-compose up --build
 ```
 
-### Problem: SBT build errors
+### Problem: SBT build errors or dependency not found
 
 **Solution:**
 ```bash
 # Clean and rebuild
 sbt clean compile
 
-# If persistent, clear caches
+# If persistent, clear caches and update dependencies
 rm -rf ~/.sbt ~/.ivy2/cache
-sbt clean compile
+sbt clean update compile
+```
+
+**Common causes:**
+- Network issues preventing access to Maven repositories
+- Proxy or firewall blocking access to https://repo.akka.io/maven
+- Outdated SBT version (requires 1.9.7+)
+- Missing Java 11+ installation
+
+**Verify your environment:**
+```bash
+# Check SBT version (should be 1.9.7+)
+sbt --version
+
+# Check Java version (should be 11+)
+java -version
+
+# Test Maven repository access
+curl -I https://repo.akka.io/maven
 ```
 
 ### Problem: Database connection errors

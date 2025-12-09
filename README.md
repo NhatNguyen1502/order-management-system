@@ -345,9 +345,38 @@ Ensure PostgreSQL is running and accessible. Check connection settings in servic
 # Clean and rebuild
 sbt clean compile
 
-# Clear SBT cache
+# Clear SBT cache if you encounter dependency resolution issues
 rm -rf ~/.sbt ~/.ivy2/cache
+sbt clean update compile
 ```
+
+### Dependency Resolution Issues
+
+If you encounter "dependency not found" errors:
+
+1. **Ensure Maven repositories are accessible:**
+   - The build requires access to Maven Central and Akka's Maven repository
+   - Check your network connection and proxy settings if behind a corporate firewall
+
+2. **Clear dependency cache:**
+   ```bash
+   rm -rf ~/.sbt ~/.ivy2/cache
+   sbt clean update
+   ```
+
+3. **Check SBT version:**
+   - This project requires SBT 1.9.7 or higher
+   - Run `sbt --version` to verify
+   - Update SBT if needed: https://www.scala-sbt.org/download.html
+
+4. **Common dependency issues:**
+   - `akka-http-cors`: Now using correct organization `ch.megard`
+   - `akka-projection`: Requires Akka's Maven repository
+   - `slick` and `slick-hikaricp`: Required for JDBC persistence
+
+5. **Verify Java version:**
+   - JDK 11 or higher is required
+   - Run `java -version` to check
 
 ### Docker Issues
 
