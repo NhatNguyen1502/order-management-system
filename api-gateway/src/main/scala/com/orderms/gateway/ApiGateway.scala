@@ -8,14 +8,14 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import ch.megard.akka.http.cors.scaladsl.settings.CorsSettings
-import com.orderms.order.grpc._
-import com.orderms.inventory.grpc._
-import com.orderms.product.grpc._
-import spray.json._
+import com.orderms.inventory.grpc.{GetInventoryRequest, InventoryServiceClient, UpdateInventoryRequest}
+import com.orderms.order.grpc.{CreateOrderRequest, GetOrderRequest, OrderItem, OrderServiceClient}
+import com.orderms.product.grpc.{CreateProductRequest, GetProductRequest, ListProductsRequest, ProductServiceClient}
+import spray.json.{DefaultJsonProtocol, JsObject, RootJsonFormat, enrichAny}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 trait JsonFormats extends SprayJsonSupport with DefaultJsonProtocol {
@@ -83,11 +83,11 @@ object ApiGateway extends JsonFormats {
     }
   }
   
-  def createRoutes(
+  private def createRoutes(
     orderService: OrderServiceClient,
     inventoryService: InventoryServiceClient,
     productService: ProductServiceClient
-  )(implicit ec: ExecutionContext): Route = {
+  ): Route = {
     
     pathPrefix("api") {
       concat(
@@ -161,7 +161,10 @@ object ApiGateway extends JsonFormats {
                         val products = response.products.map { p =>
                           ProductJson(p.productId, p.name, p.description, p.price, p.category, p.createdAt, p.updatedAt)
                         }
-                        complete(Map("products" -> products, "total" -> response.total))
+                        complete(JsObject(
+                          "products" -> products.toJson,
+                          "total" -> response.total.toJson
+                        ))
                       }
                   }
                 }
@@ -215,7 +218,10 @@ object ApiGateway extends JsonFormats {
                     request.operation
                   )
                   onSuccess(inventoryService.updateInventory(grpcRequest)) { response =>
-                    complete(Map("success" -> response.success, "newQuantity" -> response.newQuantity))
+                    complete(JsObject(
+                      "success" -> response.success.toJson,
+                      "newQuantity" -> response.newQuantity.toJson
+                    ))
                   }
                 }
               }

@@ -10,8 +10,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import java.time.Instant
 
 class ProductServiceImpl(system: ActorSystem[_]) extends ProductService {
-  
-  private implicit val ec: ExecutionContext = system.executionContext
+
+  private implicit val sys: ActorSystem[_] = system
   
   // In-memory storage for simplicity (would be a database in production)
   private val products = TrieMap.empty[String, ProductData]
@@ -77,9 +77,9 @@ class ProductServiceImpl(system: ActorSystem[_]) extends ProductService {
           updatedAt = Instant.now()
         )
         products.put(request.productId, updated)
-        Future.successful(UpdateProductResponse(true))
+        Future.successful(UpdateProductResponse(success = true))
       case None =>
-        Future.successful(UpdateProductResponse(false))
+        Future.successful(UpdateProductResponse())
     }
   }
   

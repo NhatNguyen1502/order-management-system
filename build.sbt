@@ -2,24 +2,22 @@ name := "order-management-system"
 version := "0.1.0"
 scalaVersion := "2.13.12"
 
-lazy val akkaVersion = "2.8.5"
-lazy val akkaHttpVersion = "10.5.3"
-lazy val akkaGrpcVersion = "2.4.0"
+lazy val akkaVersion = "2.10.12"
+lazy val akkaHttpVersion = "10.7.3"
+lazy val akkaGrpcVersion = "2.5.8"
 lazy val akkaPersistenceVersion = "2.8.5"
-lazy val akkaProjectionVersion = "1.5.0"
+lazy val akkaProjectionVersion = "1.6.16"
+lazy val SlickVersion = "3.5.1"
 
 lazy val commonSettings = Seq(
-  scalaVersion := "2.13.12",
+  scalaVersion := "2.13.17",
   scalacOptions ++= Seq(
     "-deprecation",
     "-feature",
     "-unchecked",
     "-Xlint"
   ),
-  resolvers ++= Seq(
-    "Akka library repository".at("https://repo.akka.io/maven"),
-    "Akka Projection repository".at("https://repo.akka.io/maven")
-  )
+  resolvers += "Akka library repository".at(s"https://repo.akka.io/fOnF6aq4lmGHCfvMkKEDUvyyaRnfhkJFBqIcPN4r9iux7LK-/secure")
 )
 
 lazy val commonDependencies = Seq(
@@ -27,9 +25,10 @@ lazy val commonDependencies = Seq(
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-cluster-sharding-typed" % akkaVersion,
-  "ch.qos.logback" % "logback-classic" % "1.4.11",
+  "com.typesafe.akka" %% "akka-discovery" % akkaVersion,
+  "ch.qos.logback" % "logback-classic" % "1.5.21",
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
-  "org.scalatest" %% "scalatest" % "3.2.17" % Test
+  "org.scalatest" %% "scalatest" % "3.2.19" % Test
 )
 
 lazy val root = (project in file("."))
@@ -43,12 +42,14 @@ lazy val apiGateway = (project in file("api-gateway"))
     libraryDependencies ++= commonDependencies ++ Seq(
       "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
       "com.typesafe.akka" %% "akka-http-spray-json" % akkaHttpVersion,
-      "com.typesafe.akka" %% "akka-http2-support" % akkaHttpVersion,
+      "com.lightbend.akka.grpc" %% "akka-grpc-runtime" % akkaGrpcVersion,
       "ch.megard" %% "akka-http-cors" % "1.2.0"
     )
   )
   .enablePlugins(AkkaGrpcPlugin)
-  .dependsOn(orderService % "protobuf", inventoryService % "protobuf", productService % "protobuf")
+  .dependsOn(orderService % "protobuf->compile;compile->compile",
+             inventoryService % "protobuf->compile;compile->compile",
+             productService % "protobuf->compile;compile->compile")
 
 lazy val orderService = (project in file("order-service"))
   .settings(commonSettings)
@@ -61,9 +62,9 @@ lazy val orderService = (project in file("order-service"))
       "com.lightbend.akka" %% "akka-projection-eventsourced" % akkaProjectionVersion,
       "com.lightbend.akka" %% "akka-projection-jdbc" % akkaProjectionVersion,
       "com.lightbend.akka" %% "akka-projection-slick" % akkaProjectionVersion,
-      "com.typesafe.akka" %% "akka-persistence-jdbc" % "5.3.0",
-      "com.typesafe.slick" %% "slick" % "3.4.1",
-      "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
+      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.5.4",
+      "com.typesafe.slick" %% "slick" % SlickVersion,
+      "com.typesafe.slick" %% "slick-hikaricp" % SlickVersion,
       "org.postgresql" % "postgresql" % "42.6.0",
       "com.zaxxer" % "HikariCP" % "5.1.0"
     )
@@ -78,11 +79,11 @@ lazy val inventoryService = (project in file("inventory-service"))
       "com.typesafe.akka" %% "akka-persistence-typed" % akkaPersistenceVersion,
       "com.typesafe.akka" %% "akka-persistence-query" % akkaPersistenceVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
-      "com.typesafe.akka" %% "akka-persistence-jdbc" % "5.3.0",
-      "com.typesafe.slick" %% "slick" % "3.4.1",
-      "com.typesafe.slick" %% "slick-hikaricp" % "3.4.1",
+      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.5.4",
+      "com.typesafe.slick" %% "slick" % SlickVersion,
+      "com.typesafe.slick" %% "slick-hikaricp" % SlickVersion,
       "org.postgresql" % "postgresql" % "42.6.0",
-      "com.zaxxer" % "HikariCP" % "5.1.0"
+      "com.zaxxer" % "HikariCP" % "7.0.2"
     )
   )
   .enablePlugins(AkkaGrpcPlugin)
