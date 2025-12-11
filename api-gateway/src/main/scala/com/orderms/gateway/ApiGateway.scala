@@ -15,7 +15,8 @@ import com.orderms.order.grpc.{CreateOrderRequest, GetOrderRequest, OrderItem, O
 import com.orderms.product.grpc.{CreateProductRequest, GetProductRequest, ListProductsRequest, ProductServiceClient}
 import spray.json.{DefaultJsonProtocol, JsObject, RootJsonFormat, enrichAny}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 import scala.util.{Failure, Success}
 
 trait JsonFormats extends SprayJsonSupport with DefaultJsonProtocol {
@@ -67,7 +68,7 @@ object ApiGateway extends JsonFormats {
       routes
     }
     
-    val bindingFuture = Http().newServerAt("0.0.0.0", 8080).bind(routesWithCors)
+    val bindingFuture = Http().newServerAt("127.0.0.1", 8080).bind(routesWithCors)
     
     bindingFuture.onComplete {
       case Success(binding) =>
@@ -81,6 +82,7 @@ object ApiGateway extends JsonFormats {
         system.log.error("Failed to bind HTTP endpoint, terminating system", ex)
         system.terminate()
     }
+    Await.result(system.whenTerminated, Duration.Inf)
   }
   
   private def createRoutes(

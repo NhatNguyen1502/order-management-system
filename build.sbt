@@ -5,7 +5,6 @@ scalaVersion := "2.13.12"
 lazy val akkaVersion = "2.10.12"
 lazy val akkaHttpVersion = "10.7.3"
 lazy val akkaGrpcVersion = "2.5.8"
-lazy val akkaPersistenceVersion = "2.8.5"
 lazy val akkaProjectionVersion = "1.6.16"
 lazy val SlickVersion = "3.5.1"
 
@@ -56,8 +55,8 @@ lazy val orderService = (project in file("order-service"))
   .settings(
     name := "order-service",
     libraryDependencies ++= commonDependencies ++ Seq(
-      "com.typesafe.akka" %% "akka-persistence-typed" % akkaPersistenceVersion,
-      "com.typesafe.akka" %% "akka-persistence-query" % akkaPersistenceVersion,
+      "com.typesafe.akka" %% "akka-persistence-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-query" % akkaVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
       "com.lightbend.akka" %% "akka-projection-eventsourced" % akkaProjectionVersion,
       "com.lightbend.akka" %% "akka-projection-jdbc" % akkaProjectionVersion,
@@ -76,8 +75,8 @@ lazy val inventoryService = (project in file("inventory-service"))
   .settings(
     name := "inventory-service",
     libraryDependencies ++= commonDependencies ++ Seq(
-      "com.typesafe.akka" %% "akka-persistence-typed" % akkaPersistenceVersion,
-      "com.typesafe.akka" %% "akka-persistence-query" % akkaPersistenceVersion,
+      "com.typesafe.akka" %% "akka-persistence-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-query" % akkaVersion,
       "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
       "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.5.4",
       "com.typesafe.slick" %% "slick" % SlickVersion,

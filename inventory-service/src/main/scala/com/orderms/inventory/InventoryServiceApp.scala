@@ -6,7 +6,8 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import com.orderms.inventory.grpc.InventoryServiceHandler
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 object InventoryServiceApp {
@@ -14,6 +15,7 @@ object InventoryServiceApp {
   def main(args: Array[String]): Unit = {
     val system = ActorSystem[Nothing](Behaviors.empty, "InventoryService")
     new InventoryServiceApp(system).run()
+    Await.result(system.whenTerminated, Duration.Inf)
   }
 }
 
@@ -27,7 +29,7 @@ class InventoryServiceApp(system: ActorSystem[_]) {
       InventoryServiceHandler(new InventoryServiceImpl(system))
     
     val bound = Http()
-      .newServerAt("0.0.0.0", 8082)
+      .newServerAt("127.0.0.1", 8082)
       .bind(service)
     
     bound.onComplete {

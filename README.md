@@ -123,11 +123,6 @@ docker run -d \
 ```bash
 # Compile all services
 sbt compile
-
-# Generate gRPC code
-sbt order-service/compile
-sbt inventory-service/compile
-sbt product-service/compile
 ```
 
 #### 3. Run Services
@@ -136,16 +131,16 @@ In separate terminals:
 
 ```bash
 # Terminal 1: Product Service
-sbt "product-service/run"
+sbt "productService/run"
 
 # Terminal 2: Inventory Service
-sbt "inventory-service/run"
+sbt "inventoryService/run"
 
 # Terminal 3: Order Service
-sbt "order-service/run"
+sbt "orderService/run"
 
 # Terminal 4: API Gateway
-sbt "api-gateway/run"
+sbt "apiGateway/run"
 ```
 
 #### 4. Run Frontend
@@ -250,14 +245,14 @@ Database schemas are automatically created on first startup via the initializati
 
 ### Backend
 - Scala 2.13
-- Akka 2.8 (Actor, Cluster, Persistence, HTTP)
-- Akka gRPC 2.4
-- Akka Projection 1.5
+- Akka 2.10.12 (Actor, Cluster, Persistence, HTTP)
+- Akka gRPC 2.5.8
+- Akka Projection 1.6.16
 - PostgreSQL 15
 - JDBC for persistence
 
 ### Frontend
-- Angular 19
+- Angular 20
 - Angular Material
 - TypeScript
 - RxJS
@@ -339,17 +334,6 @@ If ports are already in use, modify the port mappings in `docker-compose.yml`.
 
 Ensure PostgreSQL is running and accessible. Check connection settings in service configuration files.
 
-### Build Issues
-
-```bash
-# Clean and rebuild
-sbt clean compile
-
-# Clear SBT cache if you encounter dependency resolution issues
-rm -rf ~/.sbt ~/.ivy2/cache
-sbt clean update compile
-```
-
 ### Dependency Resolution Issues
 
 If you encounter "dependency not found" errors:
@@ -358,23 +342,12 @@ If you encounter "dependency not found" errors:
    - The build requires access to Maven Central and Akka's Maven repository
    - Check your network connection and proxy settings if behind a corporate firewall
 
-2. **Clear dependency cache:**
-   ```bash
-   rm -rf ~/.sbt ~/.ivy2/cache
-   sbt clean update
-   ```
-
-3. **Check SBT version:**
+2. **Check SBT version:**
    - This project requires SBT 1.9.7 or higher
    - Run `sbt --version` to verify
    - Update SBT if needed: https://www.scala-sbt.org/download.html
 
-4. **Common dependency issues:**
-   - `akka-http-cors`: Now using correct organization `ch.megard`
-   - `akka-projection`: Requires Akka's Maven repository
-   - `slick` and `slick-hikaricp`: Required for JDBC persistence
-
-5. **Verify Java version:**
+3. **Verify Java version:**
    - JDK 11 or higher is required
    - Run `java -version` to check
 
