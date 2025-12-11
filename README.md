@@ -113,7 +113,7 @@ This project implements a modern microservices architecture with the following c
 docker run -d \
   --name postgres \
   -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
+  -p 5433:5432 \
   -v $(pwd)/docker/postgres/init:/docker-entrypoint-initdb.d \
   postgres:15-alpine
 ```
@@ -136,11 +136,14 @@ sbt "productService/run"
 # Terminal 2: Inventory Service
 sbt "inventoryService/run"
 
+# NOTE: If server says "Create a new server? y/n (default y)", press Enter
+
 # Terminal 3: Order Service
 sbt "orderService/run"
 
 # Terminal 4: API Gateway
 sbt "apiGateway/run"
+
 ```
 
 #### 4. Run Frontend

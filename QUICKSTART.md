@@ -163,7 +163,7 @@ cd order-management-system
 docker run -d \
   --name postgres \
   -e POSTGRES_PASSWORD=postgres \
-  -p 5432:5432 \
+  -p 5433:5432 \
   -v $(pwd)/docker/postgres/init:/docker-entrypoint-initdb.d \
   postgres:15-alpine
 ```
@@ -189,28 +189,28 @@ Open **4 separate terminals** and run:
 **Terminal 1 - Product Service:**
 ```bash
 cd order-management-system
-sbt "product-service/run"
+sbt "productService/run"
 # Wait for: "Product gRPC server bound to 0.0.0.0:8083"
 ```
 
 **Terminal 2 - Inventory Service:**
 ```bash
 cd order-management-system
-sbt "inventory-service/run"
+sbt "inventoryService/run"
 # Wait for: "Inventory gRPC server bound to 0.0.0.0:8082"
 ```
 
 **Terminal 3 - Order Service:**
 ```bash
 cd order-management-system
-sbt "order-service/run"
+sbt "orderService/run"
 # Wait for: "Order gRPC server bound to 0.0.0.0:8081"
 ```
 
 **Terminal 4 - API Gateway:**
 ```bash
 cd order-management-system
-sbt "api-gateway/run"
+sbt "apiGateway/run"
 # Wait for: "API Gateway online at http://0.0.0.0:8080/"
 ```
 

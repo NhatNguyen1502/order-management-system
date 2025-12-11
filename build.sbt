@@ -1,6 +1,6 @@
 name := "order-management-system"
 version := "0.1.0"
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.17"
 
 lazy val akkaVersion = "2.10.12"
 lazy val akkaHttpVersion = "10.7.3"
@@ -29,6 +29,30 @@ lazy val commonDependencies = Seq(
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
   "org.scalatest" %% "scalatest" % "3.2.19" % Test
 )
+
+import sbtassembly.AssemblyPlugin.autoImport._
+import sbtassembly.MergeStrategy
+import sbtassembly.PathList
+
+ThisBuild / assemblyMergeStrategy := {
+  case PathList("module-info.class") =>
+    MergeStrategy.discard
+
+  case PathList("META-INF", "versions", _, "module-info.class") =>
+    MergeStrategy.discard
+
+  case PathList("META-INF", xs @ _*) =>
+    xs.map(_.toLowerCase) match {
+      case ("manifest.mf" :: Nil)  => MergeStrategy.discard
+      case ("index.list" :: Nil)   => MergeStrategy.discard
+      case ("dependencies" :: Nil) => MergeStrategy.discard
+      case _                       => MergeStrategy.first
+    }
+
+  case x =>
+    val old = (ThisBuild / assemblyMergeStrategy).value
+    old(x)
+}
 
 lazy val root = (project in file("."))
   .aggregate(apiGateway, orderService, inventoryService, productService)
