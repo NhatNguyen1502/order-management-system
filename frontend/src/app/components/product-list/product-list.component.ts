@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource  } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -26,7 +26,7 @@ import { CreateProductDialogComponent } from './create-product-dialog.component'
   styleUrls: ['./product-list.component.scss']
 })
 export class ProductListComponent implements OnInit {
-  products: Product[] = [];
+  dataSource = new MatTableDataSource<Product>();
   displayedColumns: string[] = ['name', 'description', 'price', 'category', 'actions'];
 
   constructor(
@@ -42,7 +42,7 @@ export class ProductListComponent implements OnInit {
   loadProducts(): void {
     this.productService.getProducts().subscribe({
       next: (response) => {
-        this.products = response.products;
+        this.dataSource.data = response.products;
       },
       error: (error) => {
         this.snackBar.open('Error loading products', 'Close', { duration: 3000 });

@@ -7,7 +7,7 @@ import { Inventory } from '../models/models';
   providedIn: 'root'
 })
 export class InventoryService {
-  private apiUrl = '/api/inventory';
+  private apiUrl = 'http://localhost:8080/api/inventory';
 
   constructor(private http: HttpClient) { }
 
