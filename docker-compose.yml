@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: order-management-postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - order-management-network
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: order-service
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5433
+      - DB_NAME=orderdb
+      - DB_USER=orderuser
+      - DB_PASSWORD=orderpass
+      - HOSTNAME=order-service
+      - PORT=2551
+    ports:
+      - "8081:8081"
+      - "2551:2551"
+    depends_on:
+      - postgres
+    networks:
+      - order-management-network
+
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: inventory-service
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5433
+      - DB_NAME=inventorydb
+      - DB_USER=inventoryuser
+      - DB_PASSWORD=inventorypass
+      - HOSTNAME=inventory-service
+      - PORT=2552
+    ports:
+      - "8082:8082"
+      - "2552:2552"
+    depends_on:
+      - postgres
+    networks:
+      - order-management-network
+
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: product-service
+    ports:
+      - "8083:8083"
+    networks:
+      - order-management-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - order-service
+      - inventory-service
+      - product-service
+    networks:
+      - order-management-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - order-management-network
+
+volumes:
+  postgres-data:
+
+networks:
+  order-management-network:
+    driver: bridge
