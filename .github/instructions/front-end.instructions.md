@@ -1,11 +1,11 @@
 ---
 description: 'Guidelines for Angular 20 Frontend'
-applyTo: 'front-end/**'
+applyTo: 'frontend/**'
 ---
 
 # Front End Guidelines
 
-- These instructions are applied to projects: `front-end/`
+- These instructions are applied to projects: `frontend/`
 
 ## File & Folder Organization
 
