@@ -46,16 +46,33 @@ class ProductServiceImpl(system: ActorSystem[_]) extends ProductService {
     val entityRef = sharding.entityRefFor(ProductEntityKey, productId)
     
     import akka.actor.typed.scaladsl.AskPattern._
+    implicit val ec: ExecutionContext = system.executionContext
     
     entityRef.ask[ProductEntity.ProductResponse](replyTo => 
       ProductEntity.CreateProduct(request.name, request.description, request.price, request.category, replyTo)
-    ).map {
+    ).flatMap {
       case ProductEntity.ProductCreatedResponse(id) =>
-        val now = Instant.now()
-        productsCache.put(id, ProductData(id, request.name, request.description, request.price, request.category, now, now))
-        CreateProductResponse(id)
+        // Fetch the product to get the actual timestamp and update cache
+        entityRef.ask[ProductEntity.ProductResponse](replyTo => 
+          ProductEntity.GetProduct(replyTo)
+        ).map {
+          case ProductEntity.ProductDetails(state) =>
+            productsCache.put(id, ProductData(
+              state.productId,
+              state.name,
+              state.description,
+              state.price,
+              state.category,
+              state.createdAt,
+              state.updatedAt
+            ))
+            CreateProductResponse(id)
+          case _ =>
+            // Even if we can't cache, the product was created successfully
+            CreateProductResponse(id)
+        }
       case _ =>
-        throw new GrpcServiceException(Status.INTERNAL.withDescription("Failed to create product"))
+        Future.failed(new GrpcServiceException(Status.INTERNAL.withDescription("Failed to create product")))
     }
   }
   
@@ -68,6 +85,16 @@ class ProductServiceImpl(system: ActorSystem[_]) extends ProductService {
       ProductEntity.GetProduct(replyTo)
     ).map {
       case ProductEntity.ProductDetails(state) =>
+        // Update cache with actual persisted state
+        productsCache.put(state.productId, ProductData(
+          state.productId,
+          state.name,
+          state.description,
+          state.price,
+          state.category,
+          state.createdAt,
+          state.updatedAt
+        ))
         val grpcProduct = Product(
           state.productId,
           state.name,
@@ -91,27 +118,39 @@ class ProductServiceImpl(system: ActorSystem[_]) extends ProductService {
     val entityRef = sharding.entityRefFor(ProductEntityKey, request.productId)
     
     import akka.actor.typed.scaladsl.AskPattern._
+    implicit val ec: ExecutionContext = system.executionContext
     
     entityRef.ask[ProductEntity.ProductResponse](replyTo => 
       ProductEntity.UpdateProduct(request.name, request.description, request.price, request.category, replyTo)
-    ).map {
+    ).flatMap {
       case ProductEntity.ProductUpdatedResponse(success) =>
         if (success) {
-          productsCache.get(request.productId).foreach { product =>
-            productsCache.put(request.productId, product.copy(
-              name = request.name,
-              description = request.description,
-              price = request.price,
-              category = request.category,
-              updatedAt = Instant.now()
-            ))
+          // Fetch the updated product to sync cache with actual timestamp
+          entityRef.ask[ProductEntity.ProductResponse](replyTo => 
+            ProductEntity.GetProduct(replyTo)
+          ).map {
+            case ProductEntity.ProductDetails(state) =>
+              productsCache.put(request.productId, ProductData(
+                state.productId,
+                state.name,
+                state.description,
+                state.price,
+                state.category,
+                state.createdAt,
+                state.updatedAt
+              ))
+              UpdateProductResponse(true)
+            case _ =>
+              // Even if we can't cache, the product was updated successfully
+              UpdateProductResponse(true)
           }
+        } else {
+          Future.successful(UpdateProductResponse(false))
         }
-        UpdateProductResponse(success)
       case ProductEntity.ProductNotFound(_) =>
-        UpdateProductResponse(false)
+        Future.successful(UpdateProductResponse(false))
       case _ =>
-        throw new GrpcServiceException(Status.INTERNAL.withDescription("Failed to update product"))
+        Future.failed(new GrpcServiceException(Status.INTERNAL.withDescription("Failed to update product")))
     }
   }
   

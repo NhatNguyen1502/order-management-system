@@ -106,7 +106,7 @@ lazy val inventoryService = (project in file("inventory-service"))
       "com.typesafe.slick" %% "slick" % SlickVersion,
       "com.typesafe.slick" %% "slick-hikaricp" % SlickVersion,
       "org.postgresql" % "postgresql" % "42.6.0",
-      "com.zaxxer" % "HikariCP" % "7.0.2"
+      "com.zaxxer" % "HikariCP" % "5.1.0"
     )
   )
   .enablePlugins(AkkaGrpcPlugin)
