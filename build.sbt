@@ -115,6 +115,15 @@ lazy val productService = (project in file("product-service"))
   .settings(commonSettings)
   .settings(
     name := "product-service",
-    libraryDependencies ++= commonDependencies
+    libraryDependencies ++= commonDependencies ++ Seq(
+      "com.typesafe.akka" %% "akka-persistence-typed" % akkaVersion,
+      "com.typesafe.akka" %% "akka-persistence-query" % akkaVersion,
+      "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
+      "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.5.4",
+      "com.typesafe.slick" %% "slick" % SlickVersion,
+      "com.typesafe.slick" %% "slick-hikaricp" % SlickVersion,
+      "org.postgresql" % "postgresql" % "42.6.0",
+      "com.zaxxer" % "HikariCP" % "5.1.0"
+    )
   )
   .enablePlugins(AkkaGrpcPlugin)
