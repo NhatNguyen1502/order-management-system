@@ -19,7 +19,7 @@ services:
     container_name: order-service
     environment:
       - DB_HOST=postgres
-      - DB_PORT=5433
+      - DB_PORT=5432
       - DB_NAME=orderdb
       - DB_USER=orderuser
       - DB_PASSWORD=orderpass
@@ -40,7 +40,7 @@ services:
     container_name: inventory-service
     environment:
       - DB_HOST=postgres
-      - DB_PORT=5433
+      - DB_PORT=5432
       - DB_NAME=inventorydb
       - DB_USER=inventoryuser
       - DB_PASSWORD=inventorypass
@@ -59,8 +59,19 @@ services:
       context: ./product-service
       dockerfile: Dockerfile
     container_name: product-service
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=productdb
+      - DB_USER=productuser
+      - DB_PASSWORD=productpass
+      - HOSTNAME=product-service
+      - PORT=2553
     ports:
       - "8083:8083"
+      - "2553:2553"
+    depends_on:
+      - postgres
     networks:
       - order-management-network
 
