@@ -9,7 +9,7 @@ This document provides an in-depth overview of the Order Management System archi
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         Browser                                 │
-│                      (Angular 19 SPA)                           │
+│                      (Angular 20 SPA)                           │
 └───────────────────────────┬─────────────────────────────────────┘
                             │ HTTP/REST
                             ▼
@@ -30,7 +30,7 @@ This document provides an in-depth overview of the Order Management System archi
        ▼                 ▼
 ┌─────────────────────────────────────────────┐
 │            PostgreSQL                       │
-│          Port: 5432                         │
+│          Port: 5433                         │
 │  ┌─────────────┐    ┌──────────────┐        │
 │  │  orderdb    │    │ inventorydb  │        │
 │  └─────────────┘    └──────────────┘        │
@@ -42,7 +42,7 @@ This document provides an in-depth overview of the Order Management System archi
 ### 1. Frontend (Angular 19)
 
 **Technology Stack:**
-- Angular 19 with standalone components
+- Angular 20 with standalone components
 - Angular Material for UI components
 - RxJS for reactive programming
 - TypeScript for type safety
