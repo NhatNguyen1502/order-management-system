@@ -5,6 +5,7 @@ set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE orderdb;
     CREATE DATABASE inventorydb;
+    CREATE DATABASE productdb;
 EOSQL
 
 # Create users and grant privileges for Order DB
@@ -19,6 +20,13 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname=inventorydb <<-EOSQ
     CREATE USER inventoryuser WITH PASSWORD 'inventorypass';
     GRANT ALL PRIVILEGES ON DATABASE inventorydb TO inventoryuser;
     GRANT ALL ON SCHEMA public TO inventoryuser;
+EOSQL
+
+# Create users and grant privileges for Product DB
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname=productdb <<-EOSQL
+    CREATE USER productuser WITH PASSWORD 'productpass';
+    GRANT ALL PRIVILEGES ON DATABASE productdb TO productuser;
+    GRANT ALL ON SCHEMA public TO productuser;
 EOSQL
 
 # Create tables for Order Service
@@ -125,6 +133,31 @@ psql -v ON_ERROR_STOP=1 --username inventoryuser --dbname=inventorydb <<-EOSQL
 
     CREATE INDEX inventory_reservations_product_id_idx ON inventory_reservations(product_id);
     CREATE INDEX inventory_reservations_order_id_idx ON inventory_reservations(order_id);
+EOSQL
+
+# Create tables for Product Service
+psql -v ON_ERROR_STOP=1 --username productuser --dbname=productdb <<-EOSQL
+    -- Akka Persistence Journal
+    CREATE TABLE IF NOT EXISTS journal (
+        ordering BIGSERIAL,
+        persistence_id VARCHAR(255) NOT NULL,
+        sequence_number BIGINT NOT NULL,
+        deleted BOOLEAN DEFAULT FALSE,
+        tags VARCHAR(255) DEFAULT NULL,
+        message BYTEA NOT NULL,
+        PRIMARY KEY(persistence_id, sequence_number)
+    );
+
+    CREATE UNIQUE INDEX journal_ordering_idx ON journal(ordering);
+
+    -- Akka Persistence Snapshot
+    CREATE TABLE IF NOT EXISTS snapshot (
+        persistence_id VARCHAR(255) NOT NULL,
+        sequence_number BIGINT NOT NULL,
+        created BIGINT NOT NULL,
+        snapshot BYTEA NOT NULL,
+        PRIMARY KEY(persistence_id, sequence_number)
+    );
 EOSQL
 
 echo "Database initialization completed successfully"
